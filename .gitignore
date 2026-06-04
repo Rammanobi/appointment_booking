@@ -1,0 +1,36 @@
+# Firebase credentials and keys
+appmanag-30eb1-firebase-adminsdk-fbsvc-ef858cfcbe.json
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+functions/.env
+functions/.env.example
+
+# Local debug and test scripts containing credential references
+functions/create_live_appointment_local.js
+functions/inspect_appointments.js
+run_live_flow.js
+
+# Dependencies
+node_modules/
+functions/node_modules/
+frontend/node_modules/
+
+# Production builds
+dist/
+frontend/dist/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+firestore-debug.log
+
+# Editor configurations
+.vscode/
+.idea/
+.DS_Store

@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /appointments/{appointmentId} {
+      // Allow public creation with strict validations
+      allow create: if request.resource.data.customerName is string 
+                    && request.resource.data.customerName.size() >= 2
+                    && request.resource.data.email is string
+                    && request.resource.data.email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')
+                    && request.resource.data.appointmentTime is timestamp
+                    && request.resource.data.appointmentTime > request.time;
+
+      // Allow public read for the dashboard
+      allow read: if true;
+
+      // Allow write/update for systems/triggers
+      allow update, delete: if true;
+    }
+  }
+}
