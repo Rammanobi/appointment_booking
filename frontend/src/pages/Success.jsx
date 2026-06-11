@@ -9,7 +9,7 @@ export default function Success() {
       </div>
       <h2 className="font-headline-md text-headline-md text-primary tracking-tight">Appointment Created Successfully</h2>
       <p className="font-body-md text-body-md text-secondary">
-        A confirmation email has been sent to your provided email address. We will remind you 1 hour before the appointment.
+        A confirmation message has been sent to your provided whatsapp message. We will remind you 1 hour before the appointment.
       </p>
       <div className="w-full pt-md mt-sm border-t border-surface-variant flex flex-col gap-sm">
         <Link to="/dashboard" className="w-full font-label-md text-label-md text-on-primary bg-primary py-md rounded hover:bg-tertiary-container transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none">

@@ -23,7 +23,8 @@ A production-grade appointment scheduling system featuring automated WhatsApp co
 * **Idempotency & Duplicate Protection**: Safety filters verify if an appointment has been cancelled or if a reminder was already sent before sending WhatsApp messages.
 
 ### 3. Production Hardening & Safety Controls (Phase 7)
-* **Double-Booking Prevention**: Server-side checks block duplicate submissions with the same phone number and appointment time within a 2-minute window.
+* **Double-Booking Prevention**: Server-side checks block duplicate submissions with the same phone number and appointment time within a 2-minute window. This check is highly optimized—it retrieves base documents and filters timestamps in application memory to completely bypass the need for Firestore Composite Indexes and prevent `FAILED_PRECONDITION` crashes.
+* **Twilio Sandbox Compliance**: The WhatsApp integration enforces strict compliance with Twilio Sandbox template rules, ensuring messages are delivered properly even outside the standard 24-hour conversational window.
 * **Interactive Cancellation**: Users can cancel upcoming appointments directly from the actions column. This halts any scheduled reminder task and updates the status to `Cancelled` in real-time.
 
 ---

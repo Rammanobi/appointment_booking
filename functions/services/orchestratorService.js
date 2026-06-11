@@ -28,18 +28,24 @@ async function handleAppointmentCreated(appointmentId, appointmentData) {
     }
 
     // 3. Duplicate booking window prevention (2-minute window)
+    // Avoid composite index requirement by filtering everything except phone in memory
     const db = getFirestore();
     const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
     const duplicatesSnapshot = await db.collection("appointments")
       .where("phone", "==", appointmentData.phone)
-      .where("appointmentTime", "==", appointmentData.appointmentTime)
-      .where("createdAt", ">=", twoMinutesAgo)
       .get();
 
     let isDuplicate = false;
     duplicatesSnapshot.forEach((doc) => {
       if (doc.id !== appointmentId) {
-        isDuplicate = true;
+        const docData = doc.data();
+        if (
+          docData.appointmentTime === appointmentData.appointmentTime &&
+          docData.createdAt &&
+          docData.createdAt.toDate() >= twoMinutesAgo
+        ) {
+          isDuplicate = true;
+        }
       }
     });
 

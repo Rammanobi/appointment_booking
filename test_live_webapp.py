@@ -20,7 +20,7 @@ def main():
         # Fill out form
         print("Filling out form fields...")
         page.fill("#name", "Real Webapp Test")
-        page.fill("#email", "ram.kuparati.ai@gmail.com")
+        page.fill("#phone", "+918520845152")
         
         # Set date and time (tomorrow at 15:45)
         tomorrow = datetime.now() + timedelta(days=1)

@@ -132,9 +132,9 @@ async function retryWithBackoff(fn, appointmentId, messageType, retries = 3, del
 async function sendConfirmationWhatsApp(appointmentId, phone, customerName, appointmentTime, customMessage) {
   const { client, isMock, fromNumber } = getTwilioClient();
   const formattedTime = formatDateTime(appointmentTime);
-  const messageBody = customMessage || "Your appointment has been successfully scheduled and confirmed.";
-
-  const body = `✅ *Appointment Confirmed*\n\nHello *${customerName}*,\n\n${messageBody}\n\n📅 *Scheduled Time:*\n${formattedTime}\n\nIf you need to reschedule or cancel, please contact us directly.\n\n— Appointment Manager`;
+  // Twilio Sandbox ONLY allows exact pre-approved templates if outside 24h window
+  // We must use this exact string format for sandbox delivery to work
+  const body = `Your appointment is coming up on ${formattedTime} at ${customerName}`;
 
   if (isMock) {
     await writeAuditLog(
@@ -206,9 +206,9 @@ async function sendConfirmationWhatsApp(appointmentId, phone, customerName, appo
 async function sendReminderWhatsApp(appointmentId, phone, customerName, appointmentTime, customMessage) {
   const { client, isMock, fromNumber } = getTwilioClient();
   const formattedTime = formatDateTime(appointmentTime);
-  const messageBody = customMessage || "This is a friendly reminder that your upcoming appointment is scheduled to start in 1 hour.";
-
-  const body = `⏰ *Appointment Reminder*\n\nHello *${customerName}*,\n\n${messageBody}\n\n📅 *Scheduled Time:*\n${formattedTime}\n\nPlease make sure to arrive on time. We look forward to seeing you.\n\n— Appointment Manager`;
+  // Twilio Sandbox ONLY allows exact pre-approved templates if outside 24h window
+  // We must use this exact string format for sandbox delivery to work
+  const body = `Your appointment is coming up on ${formattedTime} at ${customerName}`;
 
   if (isMock) {
     await writeAuditLog(
