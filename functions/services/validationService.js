@@ -16,13 +16,13 @@ function validateAppointment(data) {
     };
   }
 
-  // Validate email
-  if (!data.email || typeof data.email !== 'string') {
-    return { isValid: false, error: "email is required" };
+  // Validate phone (E.164 international format)
+  if (!data.phone || typeof data.phone !== 'string') {
+    return { isValid: false, error: "phone is required" };
   }
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  if (!emailRegex.test(data.email)) {
-    return { isValid: false, error: "email format is invalid" };
+  const phoneRegex = /^\+[1-9]\d{6,14}$/;
+  if (!phoneRegex.test(data.phone)) {
+    return { isValid: false, error: "phone format is invalid. Use international format like +918520845152" };
   }
 
   // Validate appointmentTime

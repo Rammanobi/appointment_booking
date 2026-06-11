@@ -18,12 +18,12 @@ exports.onAppointmentCreated = onDocumentCreated({
     console.log("No data associated with the event");
     return;
   }
-  
+
   const appointmentId = event.params.appointmentId;
   const appointmentData = snapshot.data();
-  
+
   console.log(`Processing new appointment trigger for ID: ${appointmentId}`);
-  
+
   try {
     await handleAppointmentCreated(appointmentId, appointmentData);
     console.log(`Successfully completed automation workflow for appointment ID: ${appointmentId}`);
@@ -33,9 +33,9 @@ exports.onAppointmentCreated = onDocumentCreated({
 });
 
 // 2. Production HTTP trigger: Target callback for Google Cloud Tasks API execution
-exports.executeReminderCallback = onRequest({ 
+exports.executeReminderCallback = onRequest({
   region: "us-central1",
-  cors: true 
+  cors: true
 }, async (req, res) => {
   try {
     const { appointmentId } = req.body;
@@ -43,10 +43,10 @@ exports.executeReminderCallback = onRequest({
       res.status(400).send("Missing appointmentId parameter.");
       return;
     }
-    
+
     console.log(`[HTTP CALLBACK] Received Cloud Task trigger for appointment: ${appointmentId}`);
     const result = await executeReminder(appointmentId);
-    
+
     if (result.success) {
       res.status(200).send("Reminder execution completed successfully.");
     } else {
@@ -58,17 +58,5 @@ exports.executeReminderCallback = onRequest({
   }
 });
 
-// 3. Local Emulator task listener: Watch scheduled_tasks to simulate Cloud Tasks delays
-exports.onScheduledTaskCreated = onDocumentCreated({
-  document: "scheduled_tasks/{taskId}",
-  region: "us-central1"
-}, async (event) => {
-  const snapshot = event.data;
-  if (!snapshot) return;
-  
-  const taskId = event.params.taskId;
-  const taskData = snapshot.data();
-  
-  await handleTaskScheduled(taskId, taskData);
-});
+
 

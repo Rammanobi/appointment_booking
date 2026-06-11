@@ -38,15 +38,16 @@ export default function Dashboard() {
   // Filter and search logic
   const filteredAppointments = appointments.filter(appt => {
     const nameMatch = appt.customerName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const emailMatch = appt.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSearch = nameMatch || emailMatch;
+    const phoneMatch = appt.phone?.includes(searchTerm);
+    const emailMatch = appt.email?.toLowerCase().includes(searchTerm.toLowerCase()); // Backward compat
+    const matchesSearch = nameMatch || phoneMatch || emailMatch;
 
     if (filterMode === 'upcoming') {
       const isUpcoming = ['created', 'confirmation_pending', 'confirmation_sent', 'reminder_pending'].includes(appt.status);
       return matchesSearch && isUpcoming;
     }
     if (filterMode === 'failed') {
-      return matchesSearch && (appt.status === 'failed' || appt.emailStatus === 'failed');
+      return matchesSearch && (appt.status === 'failed' || appt.whatsappStatus === 'failed');
     }
     return matchesSearch;
   });
@@ -166,7 +167,7 @@ export default function Dashboard() {
         
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg flex flex-col gap-sm">
           <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest flex items-center gap-xs">
-            <span className="material-symbols-outlined text-secondary" style={{ fontSize: '16px' }}>mark_email_read</span>
+            <span className="material-symbols-outlined text-secondary" style={{ fontSize: '16px' }}>chat</span>
             Reminders Sent
           </span>
           <span className="font-headline-lg text-headline-lg text-primary">{remindersSent}</span>
@@ -204,7 +205,7 @@ export default function Dashboard() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="block w-full pl-[36px] pr-sm py-sm bg-surface-container-lowest border border-outline-variant rounded font-body-md text-body-md text-primary placeholder-outline focus:outline-none focus:border-primary focus:ring-0 transition-colors" 
-            placeholder="Search by customer name or email" 
+            placeholder="Search by customer name or phone" 
             type="text" 
           />
         </div>
@@ -216,7 +217,7 @@ export default function Dashboard() {
           <thead>
             <tr className="border-b border-outline-variant bg-surface-container-lowest">
               <th className="font-label-sm text-label-sm uppercase text-secondary py-md px-lg font-semibold tracking-wider whitespace-nowrap">Customer Name</th>
-              <th className="font-label-sm text-label-sm uppercase text-secondary py-md px-lg font-semibold tracking-wider whitespace-nowrap">Email</th>
+              <th className="font-label-sm text-label-sm uppercase text-secondary py-md px-lg font-semibold tracking-wider whitespace-nowrap">Phone Number</th>
               <th className="font-label-sm text-label-sm uppercase text-secondary py-md px-lg font-semibold tracking-wider whitespace-nowrap">Date</th>
               <th className="font-label-sm text-label-sm uppercase text-secondary py-md px-lg font-semibold tracking-wider whitespace-nowrap">Time</th>
               <th className="font-label-sm text-label-sm uppercase text-secondary py-md px-lg font-semibold tracking-wider whitespace-nowrap">Status</th>
@@ -237,7 +238,7 @@ export default function Dashboard() {
               filteredAppointments.map((appt, index) => (
                 <tr key={appt.id} className={`border-b border-outline-variant hover:bg-surface-container-low transition-colors h-[56px] ${index === 0 ? 'animate-live-row' : ''}`}>
                   <td className="px-lg py-sm align-middle font-medium">{appt.customerName}</td>
-                  <td className="px-lg py-sm align-middle text-secondary">{appt.email}</td>
+                  <td className="px-lg py-sm align-middle text-secondary">{appt.phone || appt.email}</td>
                   <td className="px-lg py-sm align-middle">{formatAppointmentDate(appt.appointmentTime)}</td>
                   <td className="px-lg py-sm align-middle">{formatAppointmentTime(appt.appointmentTime)}</td>
                   <td className="px-lg py-sm align-middle">

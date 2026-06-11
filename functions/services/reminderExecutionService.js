@@ -1,10 +1,10 @@
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
-const { sendReminderEmail } = require("./emailService");
+const { sendReminderWhatsApp } = require("./whatsappService");
 const { updateAppointmentStatus } = require("./statusService");
 const { writeAuditLog } = require("./logService");
 
 /**
- * Validates, prepares, and triggers the reminder email sending.
+ * Validates, prepares, and triggers the reminder WhatsApp message sending.
  * @param {string} appointmentId The appointment ID to execute the reminder for.
  */
 async function executeReminder(appointmentId) {
@@ -44,23 +44,23 @@ async function executeReminder(appointmentId) {
       return { success: false, reason: "reminder_already_sent" };
     }
 
-    // 4. Update status to 'reminder_pending' while processing email
+    // 4. Update status to 'reminder_pending' while processing message
     await updateAppointmentStatus(appointmentId, "reminder_pending");
     await writeAuditLog(appointmentId, "status_transition", "Status updated to reminder_pending.");
 
-    // 5. Send Reminder Email (Gmail API or simulation)
-    const emailResult = await sendReminderEmail(
+    // 5. Send Reminder WhatsApp (Twilio or simulation)
+    const whatsAppResult = await sendReminderWhatsApp(
       appointmentId,
-      appt.email,
+      appt.phone,
       appt.customerName,
       appt.appointmentTime,
       appt.reminderMessage
     );
 
-    if (emailResult.reminderSent) {
+    if (whatsAppResult.reminderSent) {
       // 6. Update status to 'reminder_sent'
       await updateAppointmentStatus(appointmentId, "reminder_sent", {
-        ...emailResult
+        ...whatsAppResult
       });
       await writeAuditLog(appointmentId, "status_transition", "Status updated to reminder_sent.");
 
@@ -74,17 +74,17 @@ async function executeReminder(appointmentId) {
 
       return { success: true };
     } else {
-      // Email failed
+      // WhatsApp failed
       await updateAppointmentStatus(appointmentId, "failed", {
-        ...emailResult
+        ...whatsAppResult
       });
       await writeAuditLog(
         appointmentId,
         "reminder_failed",
-        `Failed to deliver reminder email: ${emailResult.errorMessage}`
+        `Failed to deliver reminder WhatsApp: ${whatsAppResult.errorMessage}`
       );
 
-      return { success: false, reason: "email_delivery_failed", error: emailResult.errorMessage };
+      return { success: false, reason: "whatsapp_delivery_failed", error: whatsAppResult.errorMessage };
     }
 
   } catch (error) {

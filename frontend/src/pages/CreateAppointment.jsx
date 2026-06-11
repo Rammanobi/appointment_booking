@@ -6,7 +6,7 @@ export default function CreateAppointment() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
+    phone: '',
     appointmentDate: '',
     appointmentTime: ''
   });
@@ -21,7 +21,7 @@ export default function CreateAppointment() {
     try {
       await createAppointment({
         name: formData.name,
-        email: formData.email,
+        phone: formData.phone,
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime
       });
@@ -47,13 +47,24 @@ export default function CreateAppointment() {
           </label>
           <input className="w-full bg-surface-container-lowest border border-outline-variant rounded p-sm md:p-md font-body-md text-body-md text-primary placeholder-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors" id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Jane Doe" required type="text" />
         </div>
-        {/* Email Field */}
+        {/* Phone Field */}
         <div className="flex flex-col gap-sm">
-          <label className="font-label-md text-label-md text-primary flex justify-between" htmlFor="email">
-            Email Address
+          <label className="font-label-md text-label-md text-primary flex justify-between" htmlFor="phone">
+            Phone Number (WhatsApp)
             <span aria-hidden="true" className="text-error">*</span>
           </label>
-          <input className="w-full bg-surface-container-lowest border border-outline-variant rounded p-sm md:p-md font-body-md text-body-md text-primary placeholder-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors" id="email" name="email" value={formData.email} onChange={handleChange} placeholder="jane.doe@example.com" required type="email" />
+          <input 
+            className="w-full bg-surface-container-lowest border border-outline-variant rounded p-sm md:p-md font-body-md text-body-md text-primary placeholder-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors" 
+            id="phone" 
+            name="phone" 
+            value={formData.phone} 
+            onChange={handleChange} 
+            placeholder="+918520845152" 
+            pattern="^\+[1-9]\d{6,14}$"
+            title="Please enter a valid international phone number starting with +"
+            required 
+            type="tel" 
+          />
         </div>
         {/* Date & Time Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
@@ -82,7 +93,7 @@ export default function CreateAppointment() {
         </div>
         {/* Action Buttons */}
         <div className="flex flex-col-reverse md:flex-row gap-md mt-sm pt-md border-t border-surface-variant">
-          <button className="w-full md:w-1/2 font-label-md text-label-md text-primary bg-surface-container-lowest border border-outline-variant py-md rounded hover:bg-surface transition-colors focus:ring-2 focus:ring-primary focus:outline-none" type="reset" onClick={() => setFormData({name:'', email:'', appointmentDate:'', appointmentTime:''})}>
+          <button className="w-full md:w-1/2 font-label-md text-label-md text-primary bg-surface-container-lowest border border-outline-variant py-md rounded hover:bg-surface transition-colors focus:ring-2 focus:ring-primary focus:outline-none" type="reset" onClick={() => setFormData({name:'', phone:'', appointmentDate:'', appointmentTime:''})}>
             Reset
           </button>
           <button className="w-full md:w-1/2 font-label-md text-label-md text-on-primary bg-primary py-md rounded hover:bg-tertiary-container transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:outline-none" type="submit">
@@ -94,7 +105,7 @@ export default function CreateAppointment() {
       <div className="mt-lg pt-lg border-t border-surface-variant text-center">
         <p className="font-label-sm text-label-sm text-secondary flex items-center justify-center gap-xs">
           <span className="material-symbols-outlined text-[14px]" style={{ fontSize: '14px' }}>info</span>
-          A confirmation email will be sent automatically.
+          A confirmation WhatsApp message will be sent automatically.
         </p>
       </div>
     </div>

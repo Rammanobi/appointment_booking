@@ -3,7 +3,7 @@ const { validateAppointment } = require("./validationService");
 const { updateAppointmentStatus } = require("./statusService");
 const { calculateReminderTime } = require("./reminderService");
 const { writeAuditLog } = require("./logService");
-const { sendConfirmationEmail } = require("./emailService");
+const { sendConfirmationWhatsApp } = require("./whatsappService");
 const { scheduleReminderTask } = require("./reminderSchedulerService");
 
 /**
@@ -31,7 +31,7 @@ async function handleAppointmentCreated(appointmentId, appointmentData) {
     const db = getFirestore();
     const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
     const duplicatesSnapshot = await db.collection("appointments")
-      .where("email", "==", appointmentData.email)
+      .where("phone", "==", appointmentData.phone)
       .where("appointmentTime", "==", appointmentData.appointmentTime)
       .where("createdAt", ">=", twoMinutesAgo)
       .get();
@@ -46,7 +46,7 @@ async function handleAppointmentCreated(appointmentId, appointmentData) {
     if (isDuplicate) {
       await updateAppointmentStatus(appointmentId, "failed", {
         errorMessage: "Duplicate appointment submission detected within 2-minute window.",
-        emailStatus: "failed"
+        whatsappStatus: "failed"
       });
       await writeAuditLog(
         appointmentId,
@@ -65,7 +65,7 @@ async function handleAppointmentCreated(appointmentId, appointmentData) {
     if (!validation.isValid) {
       await updateAppointmentStatus(appointmentId, "failed", {
         errorMessage: validation.error,
-        emailStatus: "failed"
+        whatsappStatus: "failed"
       });
       await writeAuditLog(appointmentId, "validation_failed", `Validation check failed: ${validation.error}`);
       return;
@@ -81,28 +81,28 @@ async function handleAppointmentCreated(appointmentId, appointmentData) {
       { reminderTime: reminderTime.toDate().toISOString() }
     );
 
-    // 6. Trigger confirmation email sending via Gmail API (or simulation)
-    const emailResult = await sendConfirmationEmail(
+    // 6. Trigger confirmation WhatsApp message via Twilio (or simulation)
+    const whatsAppResult = await sendConfirmationWhatsApp(
       appointmentId,
-      appointmentData.email,
+      appointmentData.phone,
       appointmentData.customerName,
       appointmentData.appointmentTime,
       appointmentData.confirmationMessage
     );
 
-    const nextStatus = emailResult.emailStatus === "sent" ? "confirmation_sent" : "failed";
+    const nextStatus = whatsAppResult.whatsappStatus === "sent" ? "confirmation_sent" : "failed";
 
     // 7. Update status to 'confirmation_sent' and store calculations
     await updateAppointmentStatus(appointmentId, nextStatus, {
       reminderTime: reminderTime,
-      ...emailResult
+      ...whatsAppResult
     });
 
     if (nextStatus === "confirmation_sent") {
       await writeAuditLog(
         appointmentId,
         "confirmation_sent_log",
-        "Confirmation email sent successfully. Proceeding to schedule reminder task..."
+        "Confirmation WhatsApp sent successfully. Proceeding to schedule reminder task..."
       );
 
       // 8. Schedule the reminder task
@@ -128,7 +128,7 @@ async function handleAppointmentCreated(appointmentId, appointmentData) {
       await writeAuditLog(
         appointmentId,
         "workflow_failed",
-        `Phase 4 workflow failed: ${emailResult.errorMessage || "Email sending failed"}`
+        `Phase 4 workflow failed: ${whatsAppResult.errorMessage || "WhatsApp sending failed"}`
       );
     }
 
@@ -139,7 +139,7 @@ async function handleAppointmentCreated(appointmentId, appointmentData) {
     try {
       await updateAppointmentStatus(appointmentId, "failed", {
         errorMessage: error.message || "Unknown error inside orchestrator",
-        emailStatus: "failed"
+        whatsappStatus: "failed"
       });
       await writeAuditLog(
         appointmentId,
@@ -156,4 +156,3 @@ async function handleAppointmentCreated(appointmentId, appointmentData) {
 module.exports = {
   handleAppointmentCreated
 };
-

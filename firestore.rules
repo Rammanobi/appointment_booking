@@ -5,8 +5,8 @@ service cloud.firestore {
       // Allow public creation with strict validations
       allow create: if request.resource.data.customerName is string 
                     && request.resource.data.customerName.size() >= 2
-                    && request.resource.data.email is string
-                    && request.resource.data.email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')
+                    && request.resource.data.phone is string
+                    && request.resource.data.phone.matches('^\\+[1-9]\\d{6,14}$')
                     && request.resource.data.appointmentTime is timestamp
                     && request.resource.data.appointmentTime > request.time;
 

@@ -5,7 +5,7 @@ const APPOINTMENTS_COLLECTION = 'appointments';
 
 export const createAppointment = async (appointmentData) => {
   try {
-    const { name, email, appointmentDate, appointmentTime } = appointmentData;
+    const { name, phone, appointmentDate, appointmentTime } = appointmentData;
     
     // Combine date and time strings into a unified Date object
     const [year, month, day] = appointmentDate.split('-').map(Number);
@@ -14,14 +14,14 @@ export const createAppointment = async (appointmentData) => {
 
     const docRef = await addDoc(collection(db, APPOINTMENTS_COLLECTION), {
       customerName: name,
-      email: email,
+      phone: phone,
       appointmentTime: Timestamp.fromDate(combinedDate),
       status: 'created',
       confirmationSent: false,
       confirmationSentAt: null,
       reminderSent: false,
       reminderSentAt: null,
-      emailStatus: 'pending',
+      whatsappStatus: 'pending',
       errorMessage: '',
       reminderTime: null,
       confirmationMessage: 'Your appointment has been successfully scheduled and confirmed.',
@@ -63,4 +63,3 @@ export const cancelAppointment = async (appointmentId) => {
     throw error;
   }
 };
-
