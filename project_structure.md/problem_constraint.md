@@ -7,9 +7,9 @@ Build a complete Appointment Reminder System that allows users to:
 1. Create appointments through a web form
 2. Store appointments in Firebase Firestore
 3. Display appointments in a live dashboard
-4. Send confirmation emails automatically using Gmail API
-5. Send reminder emails 1 hour before appointments
-6. Track email delivery status
+4. Send confirmation WhatsApp messages automatically using Twilio WhatsApp API
+5. Send reminder WhatsApp messages 1 hour before appointments
+6. Track message delivery status
 7. Update UI in real time
 
 ---
@@ -25,20 +25,19 @@ Build a complete Appointment Reminder System that allows users to:
 * Fast development
 * Suitable for interview project
 
-### Reason for Choosing Gmail API
+### Reason for Choosing Twilio WhatsApp API
 
-* Free
-* Easy to verify
-* No SMS cost
-* No WhatsApp Business approval required
-* Demonstrates automation capability
+* Reliable global delivery
+* Direct, high-engagement communication channel (WhatsApp)
+* Real-world production grade integration
+* Demonstrates third-party API orchestration capability
 
 ### Reason for Choosing Cloud Functions
 
 * Secure backend execution
-* Protect Gmail credentials
-* Handle email sending
-* Schedule reminder jobs
+* Protect Twilio credentials
+* Handle message sending & duplicate-prevention orchestration
+* Schedule reminder jobs using Cloud Tasks
 
 ---
 
@@ -49,7 +48,7 @@ Build a complete Appointment Reminder System that allows users to:
 Fields:
 
 * Customer Name
-* Email Address
+* Phone Number (WhatsApp)
 * Appointment Date
 * Appointment Time
 
@@ -60,7 +59,7 @@ Buttons:
 Validation:
 
 * Name required
-* Email required
+* Phone required (E.164 format)
 * Appointment date required
 * Appointment time required
 
@@ -71,7 +70,7 @@ Validation:
 Display:
 
 * Customer Name
-* Email
+* Phone
 * Appointment Time
 * Appointment Date
 * Confirmation Status
@@ -85,51 +84,23 @@ Dashboard Updates:
 
 ---
 
-## Email Features
+## WhatsApp Features
 
-### Confirmation Email
+### Confirmation WhatsApp
 
 Automatically send immediately after appointment creation.
 
-Example:
-
-Subject:
-Appointment Confirmed
-
-Body:
-
-Hello John,
-
-Your appointment has been successfully scheduled.
-
-Appointment Time:
-June 10, 2026
-10:00 AM
-
-Thank you.
+Example (Twilio Sandbox Template):
+Your appointment is coming up on [Date/Time] at [Customer Name]
 
 ---
 
-### Reminder Email
+### Reminder WhatsApp
 
 Automatically send 1 hour before appointment.
 
-Example:
-
-Subject:
-Appointment Reminder
-
-Body:
-
-Hello John,
-
-This is a reminder that your appointment starts in 1 hour.
-
-Appointment Time:
-June 10, 2026
-10:00 AM
-
-Thank you.
+Example (Twilio Sandbox Template):
+Your appointment is coming up on [Date/Time] at [Customer Name]
 
 ---
 
@@ -158,11 +129,11 @@ H --> I[Dashboard Updates Automatically]
 
 G --> J[Cloud Function Trigger]
 
-J --> K[Generate Confirmation Email]
+J --> K[Format WhatsApp Template]
 
-K --> L[Gmail API]
+K --> L[Twilio API]
 
-L --> M[Send Confirmation Email]
+L --> M[Send Confirmation WhatsApp]
 
 M --> N[Update Firestore Status]
 
@@ -176,11 +147,11 @@ Q --> R[Wait Until Reminder Time]
 
 R --> S[Execute Reminder Function]
 
-S --> T[Generate Reminder Email]
+S --> T[Format Reminder Template]
 
-T --> U[Gmail API]
+T --> U[Twilio API]
 
-U --> V[Send Reminder Email]
+U --> V[Send Reminder WhatsApp]
 
 V --> W[Update Reminder Status]
 
@@ -206,7 +177,7 @@ Step 2
 User enters:
 
 * Name
-* Email
+* Phone Number
 * Appointment Date
 * Appointment Time
 
@@ -256,13 +227,13 @@ Cloud Function triggers.
 
 Step 10
 
-Confirmation email is generated.
+Confirmation WhatsApp template is formatted.
 
 ↓
 
 Step 11
 
-Gmail API sends confirmation email.
+Twilio API sends confirmation WhatsApp message.
 
 ↓
 
@@ -302,13 +273,13 @@ Reminder time reached.
 
 Step 17
 
-Reminder email generated.
+Reminder WhatsApp template formatted.
 
 ↓
 
 Step 18
 
-Gmail API sends reminder email.
+Twilio API sends reminder WhatsApp message.
 
 ↓
 
@@ -334,14 +305,13 @@ Document Structure:
 
 ```json
 {
-  "name": "John Doe",
-  "email": "john@gmail.com",
-  "appointmentDate": "2026-06-10",
-  "appointmentTime": "10:00 AM",
+  "customerName": "John Doe",
+  "phone": "+918520845152",
+  "appointmentTime": "timestamp",
   "confirmationSent": false,
   "reminderSent": false,
   "createdAt": "timestamp",
-  "status": "scheduled"
+  "status": "Scheduled"
 }
 ```
 
@@ -369,8 +339,6 @@ services/
 
 firebase.js
 
-gmailService.js
-
 appointmentService.js
 
 hooks/
@@ -383,11 +351,13 @@ Home.jsx
 
 functions/
 
-sendConfirmationEmail.js
+services/
+  orchestratorService.js
+  whatsappService.js
+  reminderSchedulerService.js
+  reminderExecutionService.js
 
-sendReminderEmail.js
-
-scheduleReminder.js
+index.js
 
 public/
 
@@ -404,7 +374,7 @@ Appointment Form
 Fields:
 
 * Name
-* Email
+* Phone Number
 * Date
 * Time
 
@@ -428,7 +398,7 @@ Live Dashboard
 Columns:
 
 * Name
-* Email
+* Phone
 * Date
 * Time
 * Confirmation Status
@@ -472,9 +442,11 @@ Please Try Again.
 
 Cloud Function Responsibilities:
 
-* Send confirmation email
-* Schedule reminder
-* Send reminder email
+* Orchestrate operations
+* Duplicate prevention
+* Send confirmation WhatsApp message
+* Schedule reminder using Cloud Tasks
+* Send reminder WhatsApp message
 * Update Firestore status
 * Handle errors
 
@@ -485,7 +457,7 @@ Cloud Function Responsibilities:
 Requirements:
 
 * Prevent invalid writes
-* Validate required fields
+* Validate required fields (E.164 phone format)
 * Protect Firestore structure
 * Prevent malformed data
 
@@ -498,7 +470,7 @@ Authentication not required for this project.
 Handle:
 
 * Firestore write failure
-* Gmail API failure
+* Twilio API failure
 * Reminder scheduling failure
 * Invalid appointment data
 
@@ -508,7 +480,7 @@ Example:
 
 ```json
 {
-  "error": "Email Sending Failed"
+  "errorMessage": "Twilio Sandbox API Validation Failed"
 }
 ```
 
@@ -516,7 +488,7 @@ Example:
 
 # Project Submission Explanation
 
-This application is an appointment reminder system built using React, Firebase Firestore, Gmail API, Cloud Functions, and Cloud Tasks. Users can create appointments through a web form, and the data is stored in Firestore. The dashboard updates in real time using Firestore listeners. When an appointment is created, a Cloud Function automatically sends a confirmation email through Gmail API. A reminder task is also scheduled to send another email one hour before the appointment. The system tracks confirmation and reminder status inside Firestore, allowing the dashboard to reflect updates instantly.
+This application is an appointment reminder system built using React, Firebase Firestore, Twilio WhatsApp API, Cloud Functions, and Cloud Tasks. Users can create appointments through a web form, and the data is stored in Firestore. The dashboard updates in real time using Firestore listeners. When an appointment is created, a Cloud Function automatically formats and sends a confirmation WhatsApp message through the Twilio API. A reminder task is also scheduled using Google Cloud Tasks that executes exactly one hour before the appointment time and sends a reminder WhatsApp message. Firestore stores all status updates, allowing the UI to stay synchronized in real time.
 
 ---
 
@@ -528,4 +500,4 @@ If asked:
 
 Answer:
 
-The frontend collects appointment information and saves it to Firestore. Firestore acts as the central source of truth. Real-time listeners update the dashboard immediately whenever data changes. A Cloud Function listens for newly created appointments and sends confirmation emails through Gmail API. The system also schedules a reminder task that executes one hour before the appointment time and sends a reminder email. Firestore stores all status updates, allowing the UI to stay synchronized in real time.
+The frontend collects appointment information and saves it to Firestore. Firestore acts as the central source of truth. Real-time listeners update the dashboard immediately whenever data changes. A Cloud Function listens for newly created appointments, checks for duplicate submissions, and sends confirmation WhatsApp messages through the Twilio Sandbox API. The system also calculates and schedules a Cloud Task that executes exactly one hour before the appointment time and triggers the reminder WhatsApp message. Firestore stores all status updates and error states, allowing the UI grid to stay perfectly synchronized in real time.
